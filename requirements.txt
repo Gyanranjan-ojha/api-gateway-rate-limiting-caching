@@ -1,0 +1,36 @@
+# ____Required FastAPI packages_____
+# FastAPI framework for building APIs
+fastapi==0.112.2
+# Uvicorn ASGI server for serving FastAPI apps
+uvicorn==0.30.6
+
+# ____Required Fake Data packages_____
+# Faker for generating fake data (useful for testing)
+Faker==28.1.0
+
+# ____Required JWT packages_____
+# python-jose for encoding/decoding JSON Web Tokens (JWT)
+python-jose==3.3.0  # Used for JWT authentication
+
+# ____Required Password Hashing packages_____
+# Passlib for password hashing (using bcrypt)
+passlib[bcrypt]==1.7.4
+
+# ____Required Pydantic packages_____
+# Pydantic for data validation and serialization
+pydantic==2.8.2
+# pydantic-settings for loading environment variables
+pydantic-settings==2.4.0
+
+# ____Required Redis Cache packages_____
+# Redis library for Python to interact with Redis server
+redis==5.0.8  # Used for caching and rate limiting
+
+# ____Required Testing packages_____
+# Pytest for running tests
+pytest==7.2.0 
+# Httpx is used by FastAPI's TestClient for testing routes
+httpx==0.24.1  
+
+# ____Logging & Debugging dependencies_____
+# Logging configuration can be added if necessary, but no additional package is required
