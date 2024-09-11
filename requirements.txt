@@ -1,6 +1,9 @@
 # ____Required FastAPI packages_____
 # FastAPI framework for building APIs
 fastapi==0.112.2
+fastapi[standard]
+python-multipart==0.0.9
+
 # Uvicorn ASGI server for serving FastAPI apps
 uvicorn==0.30.6
 
