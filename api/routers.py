@@ -1,11 +1,12 @@
 """
 Router definitions for the FastAPI application with rate limiting, caching, and authentication.
 """
+from datetime import timedelta
 
 import redis
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm  # Import OAuth2PasswordRequestForm
-from datetime import timedelta
+from faker import Faker
 
 from api.auth import (
     authenticate_user, 
@@ -16,7 +17,7 @@ from api.auth import (
     User, 
 )
 from api.config import env_settings  # Settings for environment variables
-from api.main import generate_fake_users  # Fake user generation
+
 
 # ____Redis Initialization (Caching & Rate Limiting)____
 # Initialize Redis connection using environment settings
@@ -28,6 +29,29 @@ redis_client = redis.Redis(
 
 # Create an API router
 api_router = APIRouter()
+
+fake = Faker()  # Faker instance for generating fake data
+
+# ____Performance: Fake Data Generation for Testing/Mocking____
+def generate_fake_users(n=10):
+    """
+    Generate a list of fake users.
+
+    Args:
+        n (int): The number of users to generate. Default is 10.
+
+    Returns:
+        list[User]: A list of User objects populated with fake data.
+    """
+    users = []
+    for i in range(n):
+        user = User(
+            id=i,  # Assign incremental IDs
+            name=fake.name(),  # Generate a fake name
+            email=fake.email()  # Generate a fake email
+        )
+        users.append(user)
+    return users
 
 # ____Rate Limiting Logic with Redis Cache____
 def rate_limiter(client_id: str):
