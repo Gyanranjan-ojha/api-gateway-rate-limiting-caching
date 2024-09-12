@@ -41,12 +41,6 @@ api-gateway-rate-limiting-caching/
 │   ├── models.py                  # Defines Pydantic models for data validation and serialization.
 │   └── routers.py                 # Defines API routes and integrates rate limiting, caching, and authentication.
 │
-├── nginx/                         # Directory containing NGINX configuration files.
-│   └── nginx.conf                 # NGINX configuration for reverse proxy and load balancing.
-│
-├── redis/                         # Directory containing Redis configuration files.
-│   └── redis.conf                 # Redis configuration for caching and rate limiting.
-│
 ├── .env                           # Environment file containing environment variables for the application.
 ├── .gitignore                     # Specifies files and directories to be ignored by Git.
 ├── requirements.txt               # Lists all Python dependencies needed for the project.
@@ -106,10 +100,10 @@ Create a `.env` file in the src directory and provide the necessary environment 
     export JWT_SECRET=your_jwt_secret_here
     export REDIS_HOST=localhost
     export REDIS_PORT=6379
-    export LOG_FILE_PATH=./logs/error.log
+    export LOG_FILE_PATH=./app/error.log
 ```
 
-- Create a "logs" folder and "error.log" file
+- Create a "logs" folder and "app.log" file
 
 ```bash
     mkdir logs
@@ -117,33 +111,26 @@ Create a `.env` file in the src directory and provide the necessary environment 
 - For Ubuntu
 
 ```bash
-    touch logs/error.log
+    touch logs/app.log
 ```
 
 - For Windows
 
 ```bash
-    echo log file > error.log 
+    echo log file > app.log 
 ```
 
 ## Running the Application
 
 **1. Start Redis**
-- Ensure Redis is running on your local machine. If not, you can start it with the following command:
+- Ensure Redis is running on your local machine.
 
 ```bash
-    redis-server redis/redis.conf
+    redis-server
 ```
 
 **2. Run the FastAPI Application**
 
 ```bash
     uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
-```
-
-**3. Run NGINX**
-
-```bash
-    cd gateway
-    bash start_nginx.sh
 ```
