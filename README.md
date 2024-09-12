@@ -47,15 +47,6 @@ api-gateway-rate-limiting-caching/
 ├── redis/                         # Directory containing Redis configuration files.
 │   └── redis.conf                 # Redis configuration for caching and rate limiting.
 │
-├── tests/                         # Directory containing test cases for the application.
-│   ├── __init__.py                # Marks the tests directory as a Python package.
-│   ├── test_auth.py               # Unit tests for authentication and JWT mechanisms.
-│   ├── test_routers.py            # Tests for API routes and their functionality.
-│   ├── test_rate_limiting.py      # Tests for rate-limiting functionality.
-│   ├── test_caching.py            # Tests for caching mechanisms using Redis.
-│   ├── test_config.py             # Tests for environment variable and configuration loading.
-│   └── conftest.py                # Shared pytest fixtures, including FastAPI TestClient and Redis mock setup.
-│
 ├── .env                           # Environment file containing environment variables for the application.
 ├── .gitignore                     # Specifies files and directories to be ignored by Git.
 ├── requirements.txt               # Lists all Python dependencies needed for the project.
