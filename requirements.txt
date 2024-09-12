@@ -18,6 +18,7 @@ python-jose==3.3.0  # Used for JWT authentication
 # ____Required Password Hashing packages_____
 # Passlib for password hashing (using bcrypt)
 passlib[bcrypt]==1.7.4
+bcrypt==3.2.0
 
 # ____Required Pydantic packages_____
 # Pydantic for data validation and serialization
