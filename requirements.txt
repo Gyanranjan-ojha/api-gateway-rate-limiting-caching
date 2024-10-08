@@ -36,5 +36,3 @@ pytest==7.2.0
 # Httpx is used by FastAPI's TestClient for testing routes
 httpx==0.24.1  
 
-# ____Logging & Debugging dependencies_____
-# Logging configuration can be added if necessary, but no additional package is required

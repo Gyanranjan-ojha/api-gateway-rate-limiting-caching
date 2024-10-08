@@ -6,15 +6,13 @@ The API Gateway with Rate Limiting and Caching project is designed to manage, se
 
 ## Features
 
-**API Gateway:** Built with NGINX to route, balance, and secure incoming API requests.
+**API Gateway:** Built for route, balance, and secure incoming API requests.
 
 **Authentication:** Secure API endpoints using JSON Web Tokens (JWT) for authentication.
 
 **Rate Limiting:** Implement rate limiting using Redis to control the number of requests per client.
 
 **Caching:** Cache API responses in Redis to reduce backend load and improve response times.
-
-**Load Balancing:** Distribute incoming traffic across multiple application instances using NGINX.
 
 **Logging:** Log critical errors and events using Python's logging module for effective monitoring.
 
@@ -23,28 +21,49 @@ The API Gateway with Rate Limiting and Caching project is designed to manage, se
 Before installing the API Gateway with Rate Limiting and Caching, ensure you have the following installed:
 
 - Python (version 3.10 or higher)
-- NGINX (latest stable version)
 - Redis (latest stable version)
-- Docker (if you plan to run NGINX using Docker)
 
 ## Project Structure
 
 ```plaintext
 api-gateway-rate-limiting-caching/
 │
-├── api/                           # Directory containing core application code.
-│   ├── __init__.py                # Marks the directory as a Python package.
-│   ├── auth.py                    # Handles authentication, JWT creation, and user verification.
-│   ├── config.py                  # Manages environment variables and configuration settings.
-│   ├── logger.py                  # Configures logging for capturing application errors and events.
-│   ├── main.py                    # Entry point for the FastAPI application with route integration.
-│   ├── models.py                  # Defines Pydantic models for data validation and serialization.
-│   └── routers.py                 # Defines API routes and integrates rate limiting, caching, and authentication.
+├── api/                           # Core application code.
+│   ├── auth/                      # Authentication-related modules.
+│   │   ├── __init__.py            # Marks the directory as a Python package.
+│   │   ├── hashing.py             # Password hashing and verification.
+│   │   ├── jwt_manager.py         # JWT token creation and verification.
+│   │   ├── oauth2.py              # OAuth2 configuration and user retrieval.
+│   │   └── users.py               # User authentication and retrieval.
+│   ├── config/                    # Configuration and environment management.
+│   │   ├── __init__.py            # Marks the directory as a Python package.
+│   │   └── settings.py            # Manages environment variables and settings.
+│   ├── core/                      # Core app logic and FastAPI setup.
+│   │   ├── __init__.py            # Marks the directory as a Python package.
+│   │   ├── main.py                # FastAPI app entry point and route integration.
+│   │   └── routers.py             # Defines API routes and integrates features.
+│   ├── db/                        # Database setup and related modules.
+│   │   ├── __init__.py            # Marks the directory as a Python package.
+│   │   └── fake_db.py             # Fake users database for demonstration.
+│   ├── models/                    # Pydantic models for data validation.
+│   │   ├── __init__.py            # Marks the directory as a Python package.
+│   │   ├── tokens.py              # Defines JWT token-related models.
+│   │   └── users.py               # Defines user-related models.
+│   ├── seed/                      # Database seeding logic.
+│   │   ├── __init__.py            # Marks the directory as a Python package.
+│   │   └── product_seeder.py      # Seeds the database with fake product data.
+│   ├── caching.py                 # Implements caching logic with Redis.
+│   ├── load_balancer.py           # Load balancing logic.
+│   ├── logger.py                  # Configures application logging.
+│   └── rate_limiter.py            # Implements rate limiting using Redis.
 │
-├── .env                           # Environment file containing environment variables for the application.
-├── .gitignore                     # Specifies files and directories to be ignored by Git.
-├── requirements.txt               # Lists all Python dependencies needed for the project.
-└── README.md                      # Provides an overview of the project and instructions for setup and usage.
+├── logs/                          # Directory for application logs.
+│   └── app.log                    # Application log file.
+│
+├── .env                           # Environment variables for the application.
+├── .gitignore                     # Specifies files to be ignored by Git.
+├── requirements.txt               # Python dependencies.
+└── README.md                      # Project overview and setup instructions.
 ```
 
 ## Installation
@@ -103,23 +122,6 @@ Create a `.env` file in the src directory and provide the necessary environment 
     export LOG_FILE_PATH=./app/error.log
 ```
 
-- Create a "logs" folder and "app.log" file
-
-```bash
-    mkdir logs
-```
-- For Ubuntu
-
-```bash
-    touch logs/app.log
-```
-
-- For Windows
-
-```bash
-    echo log file > app.log 
-```
-
 ## Running the Application
 
 **1. Start Redis**
@@ -129,8 +131,13 @@ Create a `.env` file in the src directory and provide the necessary environment 
     redis-server
 ```
 
-**2. Run the FastAPI Application**
+**2. Run the 'seed' command to generate 1000 fake products data and insertion into redis**
 
 ```bash
-    uvicorn api.main:app --reload --host 127.0.0.1 --port 8000
+     python -m api.core.main seed
+```
+
+**3. Run the FastAPI Application**
+```bash
+    uvicorn api.core.main:app --host 0.0.0.0 --port 8080 --reload
 ```
