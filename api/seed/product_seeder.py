@@ -7,7 +7,7 @@ This file uses Faker to generate random product details and stores them in Redis
 from faker import Faker
 
 from ..logger import logger
-from ..rate_limiter import redis_client
+from ..rate_limiter_old import redis_client
 
 
 fake = Faker()

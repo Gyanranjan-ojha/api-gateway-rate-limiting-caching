@@ -20,7 +20,7 @@ from ..caching import CACHE_EXPIRE_TIME
 from ..db.fake_db import fake_users_db
 from ..models.users import User
 from ..logger import logger
-from ..rate_limiter import redis_client, rate_limiter
+from ..rate_limiter_old import redis_client, rate_limiter
 
 api_router = APIRouter(prefix="/api")
 

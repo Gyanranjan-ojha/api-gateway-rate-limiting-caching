@@ -1,41 +1,47 @@
 """
-Rate limiter module for FastAPI using Redis to limit the rate of client requests.
+Module for rate-limiting API requests.
+Provides a `RateLimiter` class to enforce limits on the number of requests within a time period.
 """
 
-import redis
+import time
+
 from fastapi import HTTPException
 
-from api.config.settings import env_settings
-from api.logger import logger
 
-
-# Initialize Redis client for rate-limiting
-redis_client = redis.Redis(
-    host=env_settings.REDIS_HOST, 
-    port=env_settings.REDIS_PORT, 
-    db=0
-)
-
-RATE_LIMIT_TIME = 60  # 1 minutes
-
-# Rate limiter using Redis
-def rate_limiter(client_id: str):
+class RateLimiter:
     """
-    Rate limiter using Redis to limit a user to 3 requests per RATE_LIMIT_TIME seconds.
-    Logs request counts and when rate limit is exceeded.
+    RateLimiter class to manage the number of API requests allowed per user within a specific time period.
     """
-    request_count = redis_client.get(client_id)
-    
-    if request_count:
-        logger.info(f"Current request count for {client_id}: {request_count.decode()}")
-    else:
-        logger.info(f"First request for {client_id}")
 
-    if request_count and int(request_count) >= 3:
-        logger.error(f"Rate limit exceeded for {client_id}")
-        raise HTTPException(status_code=429, detail="Rate limit exceeded")
-    else:
-        # Increment the request count for this client and set expiry
-        redis_client.incr(client_id)
-        redis_client.expire(client_id, RATE_LIMIT_TIME)  # Set expiration to RATE_LIMIT_TIME
-        logger.info(f"Incremented request count for {client_id}. New count: {redis_client.get(client_id).decode()}")
+    def __init__(self, max_requests: int, period: int):
+        self.max_requests = max_requests
+        self.period = period
+        self.request_count = {}
+
+    def limit(self, user_id: str) -> bool:
+        """
+        Applies rate-limiting to the specified user.
+
+        :param user_id: Unique identifier for the user
+        :return: Boolean indicating whether the user is within the rate limit
+        :raises: HTTPException if rate limit is exceeded
+        """
+        if not user_id:
+            raise HTTPException(status_code=400, detail="User ID is missing")
+
+        current_time = time.time()
+        
+        if user_id not in self.request_count:
+            self.request_count[user_id] = {'count': 1, 'start_time': current_time}
+        else:
+            time_since_start = current_time - self.request_count[user_id]['start_time']
+            if time_since_start < self.period:
+                self.request_count[user_id]['count'] += 1
+            else:
+                # Reset count if period has passed
+                self.request_count[user_id] = {'count': 1, 'start_time': current_time}
+
+        if self.request_count[user_id]['count'] > self.max_requests:
+            raise HTTPException(status_code=429, detail="Rate limit exceeded. Try again later.")
+
+        return True
