@@ -16,7 +16,8 @@ class APIEnvSettings(BaseSettings):
     JWT_SECRET: SecretStr 
     REDIS_HOST: str 
     REDIS_PORT: int
-    LOG_FILE_PATH: str 
+    LOG_FILE_PATH: str
+    REDIS_URL: str
     
     class Config:
         env_file = '.env'

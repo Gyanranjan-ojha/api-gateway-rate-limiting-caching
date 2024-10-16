@@ -7,7 +7,7 @@ This file sets up logging for critical application events and errors.
 import os
 import logging
 
-from api.config.settings import env_settings
+from app.config.settings import env_settings
 
 
 if not os.path.exists('logs'):

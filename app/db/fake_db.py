@@ -2,11 +2,11 @@
 Module for fake users retrieval.
 """
 
-from api.auth.hashing import get_password_hash
+from app.utils.hashing import get_password_hash
 
 
 # Fake database for demonstration
-fake_users_db = {
+fake_users_db: dict = {
     "gyanranjan@gameopedia.com": {
         "username": "gyanranjan@gameopedia.com",
         "full_name": "Gyan Ranjan Ojha",

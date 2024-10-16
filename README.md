@@ -28,34 +28,39 @@ Before installing the API Gateway with Rate Limiting and Caching, ensure you hav
 ```plaintext
 api-gateway-rate-limiting-caching/
 │
-├── api/                           # Core application code.
-│   ├── auth/                      # Authentication-related modules.
+├── app/                           # Core application code.
+│   ├── adapters/                  # Contains adapters for external services (e.g., Redis).
 │   │   ├── __init__.py            # Marks the directory as a Python package.
-│   │   ├── hashing.py             # Password hashing and verification.
-│   │   ├── jwt_manager.py         # JWT token creation and verification.
-│   │   ├── oauth2.py              # OAuth2 configuration and user retrieval.
-│   │   └── users.py               # User authentication and retrieval.
+│   │   └── redis_adapter.py        # Redis adapter for caching and rate limiting.
 │   ├── config/                    # Configuration and environment management.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
 │   │   └── settings.py            # Manages environment variables and settings.
 │   ├── core/                      # Core app logic and FastAPI setup.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
-│   │   ├── main.py                # FastAPI app entry point and route integration.
-│   │   └── routers.py             # Defines API routes and integrates features.
+│   │   ├── abstract_gateway.py     # Abstract base class for gateway implementations.
+│   │   ├── gateway_factory.py      # Factory for creating gateway instances.
+│   │   └── request_handler.py      # Handles incoming API requests.
 │   ├── db/                        # Database setup and related modules.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
 │   │   └── fake_db.py             # Fake users database for demonstration.
 │   ├── models/                    # Pydantic models for data validation.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
-│   │   ├── tokens.py              # Defines JWT token-related models.
-│   │   └── users.py               # Defines user-related models.
-│   ├── seed/                      # Database seeding logic.
+│   │   ├── product.py              # Defines product-related data models.
+│   │   ├── tokens.py               # Defines JWT token-related models.
+│   │   └── user.py                 # Defines user-related models.
+│   ├── services/                  # Contains business logic services.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
-│   │   └── product_seeder.py      # Seeds the database with fake product data.
-│   ├── caching.py                 # Implements caching logic with Redis.
-│   ├── load_balancer.py           # Load balancing logic.
-│   ├── logger.py                  # Configures application logging.
-│   └── rate_limiter.py            # Implements rate limiting using Redis.
+│   │   ├── auth_service.py         # Authentication service implementation.
+│   │   ├── cache_service.py        # Caching logic and service.
+│   │   ├── product_service.py      # Product management logic.
+│   │   └── rate_limit_service.py    # Rate limiting logic and service.
+│   ├── utils/                     # Utility functions and modules.
+│   │   ├── __init__.py            # Marks the directory as a Python package.
+│   │   ├── hashing.py             # Password hashing and verification.
+│   │   ├── jwt_manager.py         # JWT token creation and verification.
+│   │   ├── logger.py               # Configures application logging.
+│   └── main.py                    # FastAPI app entry point and route integration.
+│   └── routes.py                  # Defines API routes and integrates features.
 │
 ├── logs/                          # Directory for application logs.
 │   └── app.log                    # Application log file.
@@ -119,6 +124,7 @@ Create a `.env` file in the src directory and provide the necessary environment 
     export JWT_SECRET=your_jwt_secret_here
     export REDIS_HOST=localhost
     export REDIS_PORT=6379
+    export REDIS_URL=redis://localhost:6379
     export LOG_FILE_PATH=./app/error.log
 ```
 
@@ -134,10 +140,10 @@ Create a `.env` file in the src directory and provide the necessary environment 
 **2. Run the 'seed' command to generate 1000 fake products data and insertion into redis**
 
 ```bash
-     python -m api.core.main seed
+     python -m app.main seed
 ```
 
 **3. Run the FastAPI Application**
 ```bash
-    uvicorn api.core.main:app --host 0.0.0.0 --port 8080 --reload
+    uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
 ```
