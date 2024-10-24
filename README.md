@@ -54,11 +54,20 @@ api-gateway-rate-limiting-caching/
 │   │   ├── cache_service.py        # Caching logic and service.
 │   │   ├── product_service.py      # Product management logic.
 │   │   └── rate_limit_service.py    # Rate limiting logic and service.
+│   ├── tests/                     # Tests module for unit testing.
+│   │   ├── __init__.py            # Marks the directory as a Python package.
+│   │   ├── base_test.py            # Base test class for reference.
+│   │   ├── test_auth.py            # Unit tests for authentication.
+│   │   ├── test_caching.py          # Unit tests for redis cache.
+│   │   └── test_rate_limiting.py    # Unit tests for rate limiting.      
 │   ├── utils/                     # Utility functions and modules.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
+│   │   ├── decorators.py          # Collection of decorators for use in FastAPI applications.
+│   │   ├── encoders.py            # Collection of JSON encoders for handling special data types.
+│   │   ├── exceptions.py          # Custom Exception for use in FastAPI applications.
 │   │   ├── hashing.py             # Password hashing and verification.
 │   │   ├── jwt_manager.py         # JWT token creation and verification.
-│   │   ├── logger.py               # Configures application logging.
+│   │   └── log_manager.py         # Configures application logging
 │   └── main.py                    # FastAPI app entry point and route integration.
 │   └── routes.py                  # Defines API routes and integrates features.
 │
@@ -122,10 +131,7 @@ Create a `.env` file in the src directory and provide the necessary environment 
     export DEBUG=1
     export SECRET_KEY=your_secret_key_here
     export JWT_SECRET=your_jwt_secret_here
-    export REDIS_HOST=localhost
-    export REDIS_PORT=6379
     export REDIS_URL=redis://localhost:6379
-    export LOG_FILE_PATH=./app/error.log
 ```
 
 ## Running the Application
@@ -137,13 +143,7 @@ Create a `.env` file in the src directory and provide the necessary environment 
     redis-server
 ```
 
-**2. Run the 'seed' command to generate 1000 fake products data and insertion into redis**
-
+**2. Run the FastAPI Application**
 ```bash
-     python -m app.main seed
-```
-
-**3. Run the FastAPI Application**
-```bash
-    uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+    uvicorn app.main:app --host 127.0.0.1 --port 8080 --reload
 ```
