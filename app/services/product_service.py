@@ -4,8 +4,9 @@ Service for managing product-related operations, including seeding fake data.
 
 from faker import Faker
 
-from app.models.product import Product
 from app.adapters.redis_adapter import RedisAdapter
+from app.models.product import Product
+from app.utils.exceptions import ProductNotFoundException
 
 
 fake = Faker()
@@ -24,6 +25,8 @@ class ProductService:
                     product_data['name'] = product_data.pop('product_name')
 
                 products.append(Product(**product_data))
+        if not products:
+            raise ProductNotFoundException()
         return products
 
     async def create_product(self, product: Product) -> None:

@@ -4,7 +4,9 @@ Adapter for Redis operations.
 
 import redis
 
-from app.utils.logger import logger
+from app.utils.exceptions import RedisConnectionException
+from app.utils.log_manager import logger
+
 
 class RedisAdapter:
     def __init__(self, redis_url: str):
@@ -32,6 +34,6 @@ class RedisAdapter:
         try:
             return self.redis.ping()
         except Exception as e:
-            logger.error(f"Error while checking redis ping: {e}")
-            return False
+            logger.add_log_to_buffer("error", f"Error while checking redis ping: {e}")
+            raise RedisConnectionException("Redis connection failed while checking redis ping.")
 

@@ -6,10 +6,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from app.config.settings import env_settings
-from app.services.product_service import ProductService
 from app.adapters.redis_adapter import RedisAdapter
+from app.config.settings import env_settings
 from app.routes import api_router
+from app.services.product_service import ProductService
 
 
 @asynccontextmanager

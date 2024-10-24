@@ -6,9 +6,17 @@ from fastapi import Request, Response
 
 from app.core.abstract_gateway import AbstractGateway
 from app.services.auth_service import AuthService
+from app.services.cache_service import CacheService
 from app.services.product_service import ProductService
 from app.services.rate_limit_service import RateLimiter
-from app.services.cache_service import CacheService
+from app.utils.exceptions import (
+    InvalidTokenException, 
+    RateLimitExceededException, 
+    InvalidAPIRequestException,
+    ProductNotFoundException,
+)
+from app.utils.log_manager import logger
+
 
 class RequestHandler(AbstractGateway):
     def __init__(self, auth_service: AuthService, rate_limit_service: RateLimiter, 
@@ -19,26 +27,38 @@ class RequestHandler(AbstractGateway):
         self.product_service = product_service
 
     async def handle_request(self, request: Request) -> Response:
-        if not await self.authenticate(request):
-            return Response(content="Unauthorized", status_code=401)
-        if not await self.rate_limit(request):
-            return Response(content="Rate limit exceeded", status_code=429)
+        try:
+            if not await self.authenticate(request):
+                raise InvalidTokenException("Authentication failed.")
 
-        # Process the request and generate response
-        response = await self.process_request(request)
+            client_id = request.headers.get("X-Client-ID")
+            if not await self.rate_limit(client_id):
+                logger.add_log_to_buffer('warning', f"Rate-limit violation for client: {client_id}")
+                raise RateLimitExceededException()
 
-        await self.cache_response(request, response)
-        return response
+            # Process the request and generate response
+            response = await self.process_request(request)
+
+            await self.cache_response(request, response)
+            return response
+
+        except (InvalidTokenException, RateLimitExceededException) as e:
+            logger.add_log_to_buffer('error', f"Error handling request: {str(e)}")
+            return Response(content=str(e), status_code=401 if isinstance(e, InvalidTokenException) else 429)
+
+        except Exception as e:
+            logger.add_log_to_buffer('critical', f"Unexpected server error: {str(e)}")
+            return Response(content="Internal Server Error", status_code=500)
 
     async def authenticate(self, request: Request) -> bool:
         token = request.headers.get("Authorization")
         if not token:
-            return False
+            raise InvalidTokenException("Missing authorization header.")
         try:
             await self.auth_service.get_current_user(token.split()[1])
             return True
         except Exception:
-            return False
+            raise InvalidTokenException()
 
     async def rate_limit(self, client_id: str) -> bool:
         """
@@ -58,6 +78,8 @@ class RequestHandler(AbstractGateway):
         # Route based on the request path and method
         if request.method == "GET" and request.url.path.startswith("/products"):
             products = await self.product_service.get_products()
+            if not products:
+                raise ProductNotFoundException()
             return Response(content=products.json(), media_type="application/json")
 
-        return Response(content="Not Found", status_code=404)
+        raise InvalidAPIRequestException()
