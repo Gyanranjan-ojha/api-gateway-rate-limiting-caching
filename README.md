@@ -72,7 +72,6 @@ api-gateway-rate-limiting-caching/
 │   └── routes.py                  # Defines API routes and integrates features.
 │
 ├── logs/                          # Directory for application logs.
-│   └── app.log                    # Application log file.
 │
 ├── .env                           # Environment variables for the application.
 ├── .gitignore                     # Specifies files to be ignored by Git.
