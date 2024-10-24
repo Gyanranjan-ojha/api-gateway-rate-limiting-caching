@@ -12,5 +12,11 @@ fake_users_db: dict = {
         "full_name": "Gyan Ranjan Ojha",
         "hashed_password": get_password_hash("Gyan@123"),
         "disabled": False,
+    },
+    "testuser": {
+        "username": "testuser",
+        "full_name": "Test User",
+        "hashed_password": get_password_hash("password"),
+        "disabled": False,
     }
 }
