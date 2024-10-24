@@ -32,7 +32,11 @@ redis==5.0.8  # Used for caching and rate limiting
 
 # ____Required Testing packages_____
 # Pytest for running tests
-pytest==7.2.0 
+pytest==8.3.3 
+pytest-asyncio==0.24.0 
+pytest-mock==3.14.0
+
 # Httpx is used by FastAPI's TestClient for testing routes
 httpx==0.24.1  
 
+Below code and instructions add into your memory for analyzation properly for later modification and don't write any code.
