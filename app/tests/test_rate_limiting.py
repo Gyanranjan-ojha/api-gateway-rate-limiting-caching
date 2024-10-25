@@ -9,11 +9,22 @@ class TestRateLimit(BaseTest):
 
     @pytest.mark.asyncio
     async def test_rate_limit_exceeded(self, mock_rate_limiter, mock_auth_service):
-        # Mock the rate limit check to return False (rate limit exceeded)
-        mock_rate_limiter.return_value.check_rate_limit.return_value = AsyncMock(return_value=False)
-        mock_auth_service.return_value.authenticate_user.return_value = AsyncMock(username="testuser")
+        # Set up the mock to return True for the first three calls, then False to trigger rate limiting.
+        mock_rate_limiter.return_value.check_rate_limit.side_effect = [True, True, True, False]
+        mock_auth_service.return_value.get_current_user = AsyncMock(return_value={"username": "testuser"})
 
-        response = self.client.get("/products/", headers={"Authorization": "Bearer test_token"})
-        
-        assert response.status_code == 429
+        # Step 1: Obtain token for authorization
+        response = self.client.post("/token", data={"username": "testuser", "password": "password"})
+        assert response.status_code == 200, f"Expected status code 200, got {response.status_code}"
+        token = response.json()["access_token"]
+
+        # Step 2: Make three successful requests
+        headers = {"Authorization": f"Bearer {token}"}
+        for _ in range(3):
+            response = self.client.get("/products/", headers=headers)
+            assert response.status_code == 200, "Expected status code 200 for the first three requests"
+
+        # Step 3: Make fourth request, expecting a 429 response due to rate limiting
+        response = self.client.get("/products/", headers=headers)
+        assert response.status_code == 429, f"Expected status code 429, got {response.status_code}"
         assert response.json()["detail"] == "Rate limit exceeded"
