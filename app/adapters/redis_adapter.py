@@ -2,38 +2,37 @@
 Adapter for Redis operations.
 """
 
-import redis
+import redis.asyncio as aioredis
 
-from app.utils.exceptions import RedisConnectionException
 from app.utils.log_manager import logger
 
 
 class RedisAdapter:
     def __init__(self, redis_url: str):
-        self.redis = redis.Redis.from_url(redis_url, decode_responses=True)
+        self.redis = aioredis.from_url(redis_url, decode_responses=True) 
 
-    def get(self, key: str) -> str:
-        return self.redis.get(key)
+    async def get(self, key: str) -> str:
+        return await self.redis.get(key)
 
-    def set(self, key: str, value: str, expire: int = None) -> None:
-        self.redis.set(key, value, ex=expire)
+    async def set(self, key: str, value: str, expire: int = None) -> None:
+        await self.redis.set(key, value, ex=expire)
 
-    def incr(self, key: str) -> int:
-        return self.redis.incr(key)
+    async def incr(self, key: str) -> int:
+        return await self.redis.incr(key)
 
-    def expire(self, key: str, time: int) -> None:
-        self.redis.expire(key, time)
+    async def expire(self, key: str, time: int) -> None:
+        await self.redis.expire(key, time)
 
-    def hgetall(self, key: str) -> dict:
-        return self.redis.hgetall(key)
+    async def hgetall(self, key: str) -> dict:
+        return await self.redis.hgetall(key)
 
-    def hmset(self, key: str, mapping: dict) -> None:
-        self.redis.hset(key, mapping=mapping)
+    async def hmset(self, key: str, mapping: dict) -> None:
+        await self.redis.hset(key, mapping=mapping)
 
-    def ping(self) -> bool:
+    async def ping(self) -> bool:
         try:
-            return self.redis.ping()
+            return await self.redis.ping()
         except Exception as e:
-            logger.add_log_to_buffer("error", f"Error while checking redis ping: {e}")
-            raise RedisConnectionException("Redis connection failed while checking redis ping.")
-
+            print(e)
+            logger.add_log_to_buffer("error", f"Error while checking redis ping: {str(e)}")
+            return False
