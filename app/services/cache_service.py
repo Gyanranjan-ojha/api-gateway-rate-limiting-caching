@@ -25,7 +25,7 @@ class RedisCacheService(CacheService):
     async def cache_response(self, key: str, value: str, expire_time: int = 300) -> None:
         """Cache a response with a specified expiration time."""
         try:
-            self.redis_adapter.set(key, value, expire=expire_time)
+            await self.redis_adapter.set(key, value, expire=expire_time)
             logger.add_log_to_buffer('info', f"Cached response for key: {key}")
         except Exception as e:
             logger.add_log_to_buffer('error', f"Failed to cache response for key {key}: {str(e)}")
@@ -34,7 +34,7 @@ class RedisCacheService(CacheService):
     async def get_cached_response(self, key: str) -> str | None:
         """Retrieve a cached response or log a miss."""
         try:
-            cached_data = self.redis_adapter.get(key)
+            cached_data = await self.redis_adapter.get(key)
             if cached_data:
                 logger.add_log_to_buffer('info', f"Cache hit for key: {key}")
                 return cached_data

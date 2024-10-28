@@ -18,7 +18,7 @@ class ProductService:
     async def get_products(self, limit: int = 10) -> list[Product]:
         products = []
         for pid in range(limit):
-            product_data = self.redis_adapter.hgetall(f"product:{pid}")
+            product_data = await self.redis_adapter.hgetall(f"product:{pid}")
             if product_data:
                 product_data["id"] = pid                 
                 if 'product_name' in product_data:
@@ -32,7 +32,7 @@ class ProductService:
     async def create_product(self, product: Product) -> None:
         product_id = self.redis_adapter.incr("product_id_counter")
         product.id = product_id
-        self.redis_adapter.hmset(f"product:{product_id}", product.model_dump())
+        await self.redis_adapter.hmset(f"product:{product_id}", product.model_dump())
 
     def generate_fake_product(self) -> dict:
         """
@@ -65,10 +65,10 @@ class ProductService:
         Seed the database with fake products.
         This function resets the product_id_counter and overwrites existing data.
         """
-        self.redis_adapter.set("product_id_counter", 0)
+        await self.redis_adapter.set("product_id_counter", 0)
 
         for i in range(num_products):
             product_data = self.generate_fake_product()
-            self.redis_adapter.hmset(f"product:{i}", product_data)
+            await self.redis_adapter.hmset(f"product:{i}", product_data)
         
         print(f"{num_products} fake products seeded into Redis")
