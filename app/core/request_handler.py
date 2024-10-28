@@ -2,7 +2,7 @@
 Concrete implementation of the AbstractGateway for handling API requests.
 """
 
-from fastapi import Request, Response
+from fastapi import Request, Response, status
 
 from app.core.abstract_gateway import AbstractGateway
 from app.services.auth_service import AuthService
@@ -44,11 +44,17 @@ class RequestHandler(AbstractGateway):
 
         except (InvalidTokenException, RateLimitExceededException) as e:
             logger.add_log_to_buffer('error', f"Error handling request: {str(e)}")
-            return Response(content=str(e), status_code=401 if isinstance(e, InvalidTokenException) else 429)
+            return Response(
+                content=str(e), 
+                status_code=status.HTTP_401_UNAUTHORIZED 
+                    if isinstance(e, InvalidTokenException) 
+                    else status.HTTP_429_TOO_MANY_REQUESTS,
+            )
 
         except Exception as e:
             logger.add_log_to_buffer('critical', f"Unexpected server error: {str(e)}")
-            return Response(content="Internal Server Error", status_code=500)
+            print(e)
+            return Response(content=f"Internal Server Error: {str(e)}", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def authenticate(self, request: Request) -> bool:
         token = request.headers.get("Authorization")
@@ -57,8 +63,11 @@ class RequestHandler(AbstractGateway):
         try:
             await self.auth_service.get_current_user(token.split()[1])
             return True
-        except Exception:
-            raise InvalidTokenException()
+        except InvalidTokenException as e:
+            return Response(content=e.detail, status_code=status.HTTP_401_UNAUTHORIZED)
+        except Exception as e:
+            print(e)
+            return Response(content=f"Internal server error: {str(e)}", status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     async def rate_limit(self, client_id: str) -> bool:
         """
