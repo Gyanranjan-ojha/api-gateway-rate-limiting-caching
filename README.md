@@ -39,7 +39,8 @@ api-gateway-rate-limiting-caching/
 │   │   ├── __init__.py            # Marks the directory as a Python package.
 │   │   ├── abstract_gateway.py     # Abstract base class for gateway implementations.
 │   │   ├── gateway_factory.py      # Factory for creating gateway instances.
-│   │   └── request_handler.py      # Handles incoming API requests.
+│   │   ├── request_handler.py      # Handles incoming API requests.
+│   │   └── lifespan.py             # Lifespan management for app initialization and cleanup.
 │   ├── db/                        # Database setup and related modules.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
 │   │   └── fake_db.py             # Fake users database for demonstration.
@@ -47,7 +48,8 @@ api-gateway-rate-limiting-caching/
 │   │   ├── __init__.py            # Marks the directory as a Python package.
 │   │   ├── product.py              # Defines product-related data models.
 │   │   ├── tokens.py               # Defines JWT token-related models.
-│   │   └── user.py                 # Defines user-related models.
+│   │   ├── user.py                 # Defines user-related models.
+│   │   └── validation.py           # Defines validation schemas and logic.
 │   ├── services/                  # Contains business logic services.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
 │   │   ├── auth_service.py         # Authentication service implementation.
@@ -58,17 +60,17 @@ api-gateway-rate-limiting-caching/
 │   │   ├── __init__.py            # Marks the directory as a Python package.
 │   │   ├── base_test.py            # Base test class for reference.
 │   │   ├── test_auth.py            # Unit tests for authentication.
-│   │   ├── test_caching.py          # Unit tests for redis cache.
+│   │   ├── test_caching.py         # Unit tests for Redis cache.
 │   │   └── test_rate_limiting.py    # Unit tests for rate limiting.      
 │   ├── utils/                     # Utility functions and modules.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
-│   │   ├── decorators.py          # Collection of decorators for use in FastAPI applications.
-│   │   ├── encoders.py            # Collection of JSON encoders for handling special data types.
-│   │   ├── exceptions.py          # Custom Exception for use in FastAPI applications.
-│   │   ├── hashing.py             # Password hashing and verification.
-│   │   ├── jwt_manager.py         # JWT token creation and verification.
-│   │   └── log_manager.py         # Configures application logging
-│   └── main.py                    # FastAPI app entry point and route integration.
+│   │   ├── decorators.py           # Collection of decorators for use in FastAPI applications.
+│   │   ├── encoders.py             # Collection of JSON encoders for handling special data types.
+│   │   ├── exceptions.py           # Custom Exceptions for use in FastAPI applications.
+│   │   ├── hashing.py              # Password hashing and verification.
+│   │   ├── jwt_manager.py          # JWT token creation and verification.
+│   │   └── log_manager.py          # Configures application logging.
+│   ├── main.py                    # FastAPI app entry point and route integration.
 │   └── routes.py                  # Defines API routes and integrates features.
 │
 ├── logs/                          # Directory for application logs.
