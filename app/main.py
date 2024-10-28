@@ -19,18 +19,19 @@ async def lifespan(app: FastAPI):
     product_service = ProductService(redis_adapter)
 
     # Check if the seed data exists in Redis
-    existing_data = redis_adapter.hgetall("product:1")
+    existing_data = await redis_adapter.hgetall("product:1")
     if not existing_data:
         # Seed fake products into Redis if they don't already exist
         await product_service.seed_fake_products(num_products=1000)
 
-    yield  # Yield control to the app for its runtime
-
+    try:
+        yield  # Yield control to the app for its runtime
+    finally:
+        # Clear rate limit keys when the server stops
+        async for key in redis_adapter.redis.scan_iter("rate_limit:*"):
+            await redis_adapter.redis.delete(key)
 
 # Initialize FastAPI app with lifespan event handler
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(api_router)
-
-
-
