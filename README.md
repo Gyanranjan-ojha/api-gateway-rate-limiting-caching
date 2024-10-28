@@ -142,7 +142,7 @@ Create a `.env` file in the src directory and provide the necessary environment 
     redis-server
 ```
 
-**2. Run the FastAPI Application**
+**2. Run the FastAPI Application Locally**
 ```bash
     uvicorn app.main:app --host 127.0.0.1 --port 8080 --reload
 ```
