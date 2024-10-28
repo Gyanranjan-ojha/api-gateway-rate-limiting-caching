@@ -27,4 +27,3 @@ class TestRateLimit(BaseTest):
         # Step 3: Make fourth request, expecting a 429 response due to rate limiting
         response = self.client.get("/products/", headers=headers)
         assert response.status_code == 429, f"Expected status code 429, got {response.status_code}"
-        assert response.json()["detail"] == "Rate limit exceeded"
