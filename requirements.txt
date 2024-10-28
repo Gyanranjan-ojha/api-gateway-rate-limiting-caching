@@ -1,11 +1,11 @@
 # ____Required FastAPI packages_____
 # FastAPI framework for building APIs
-fastapi==0.112.2
+fastapi==0.115.2
 fastapi[standard]
 python-multipart==0.0.9
 
 # Uvicorn ASGI server for serving FastAPI apps
-uvicorn==0.30.6
+uvicorn==0.31.1
 
 # ____Required Fake Data packages_____
 # Faker for generating fake data (useful for testing)
@@ -28,7 +28,7 @@ pydantic-settings==2.4.0
 
 # ____Required Redis Cache packages_____
 # Redis library for Python to interact with Redis server
-redis==5.0.8  # Used for caching and rate limiting
+redis==5.2.0  # Used for caching and rate limiting
 
 # ____Required Testing packages_____
 # Pytest for running tests
@@ -38,5 +38,3 @@ pytest-mock==3.14.0
 
 # Httpx is used by FastAPI's TestClient for testing routes
 httpx==0.24.1  
-
-Below code and instructions add into your memory for analyzation properly for later modification and don't write any code.
