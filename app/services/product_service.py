@@ -20,14 +20,58 @@ class ProductService:
         for pid in range(limit):
             product_data = await self.redis_adapter.hgetall(f"product:{pid}")
             if product_data:
-                product_data["id"] = pid                 
+                product_data["id"] = pid
                 if 'product_name' in product_data:
                     product_data['name'] = product_data.pop('product_name')
-
                 products.append(Product(**product_data))
         if not products:
-            raise ProductNotFoundException()
+            raise ProductNotFoundException("No products found.")
         return products
+
+    async def get_product_by_id(self, product_id: int) -> Product:
+        """
+        Retrieve a product by its ID from Redis.
+        """
+        product_data = await self.redis_adapter.hgetall(f"product:{product_id}")
+        if not product_data:
+            raise ProductNotFoundException(f"Product with ID {product_id} not found.")
+        
+        # Map Redis data to Product model
+        product_data["id"] = product_id
+        if 'product_name' in product_data:
+            product_data['name'] = product_data.pop('product_name')
+        return Product(**product_data)
+
+    async def search_products(self, search_query: dict) -> list[Product]:
+        """
+        Search for products based on the given search query.
+        """
+        matched_products = []
+        limit = search_query.get("limit", 10)  # Default limit if not specified
+        max_products = await self.redis_adapter.incr("product_id_counter")  # Get the latest product ID for range
+
+        for pid in range(max_products):
+            product_data = await self.redis_adapter.hgetall(f"product:{pid}")
+            if product_data:
+                matches = all(
+                    str(product_data.get(key, "")).lower() == str(value).lower()
+                    for key, value in search_query.items()
+                    if key in product_data  # Check only keys that exist in product data
+                )
+                if matches:
+                    product_data["id"] = pid
+                    if 'product_name' in product_data:
+                        product_data['name'] = product_data.pop('product_name')
+                    matched_products.append(Product(**product_data))
+            
+            # Break if limit reached
+            if len(matched_products) >= limit:
+                break
+
+        if not matched_products:
+            raise ProductNotFoundException("No matching products found.")
+
+        return matched_products
 
     async def create_product(self, product: Product) -> None:
         product_id = self.redis_adapter.incr("product_id_counter")

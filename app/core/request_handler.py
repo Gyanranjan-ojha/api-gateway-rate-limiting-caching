@@ -2,7 +2,7 @@
 Concrete implementation of the AbstractGateway for handling API requests.
 """
 
-from fastapi import Request, Response, status
+from fastapi import HTTPException, Request, Response, status
 
 from app.core.abstract_gateway import AbstractGateway
 from app.services.auth_service import AuthService
@@ -75,6 +75,44 @@ class RequestHandler(AbstractGateway):
         Returns True if the request is within the allowed limit, False otherwise.
         """
         return await self.rate_limit_service.check_rate_limit(client_id)
+
+    async def get_product_by_id(self, product_id: int) -> Response:
+        try:
+            cached_product = await self.cache_service.get_cached_response(f"product:{product_id}")
+            if cached_product:
+                return Response(content=cached_product, media_type="application/json")
+
+            product = await self.product_service.get_product_by_id(product_id)
+            if not product:
+                raise ProductNotFoundException(f"Product with ID {product_id} not found.")
+
+            response_content = product.json()
+            await self.cache_service.cache_response(f"product:{product_id}", response_content)
+            return Response(content=response_content, media_type="application/json")
+
+        except ProductNotFoundException as e:
+            logger.add_log_to_buffer("error", str(e))
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+        except Exception as e:
+            logger.add_log_to_buffer("critical", f"Error in get_product_by_id: {str(e)}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+
+    async def search_products(self, search_query: dict) -> Response:
+        try:
+            products = await self.product_service.search_products(search_query)
+            if not products:
+                raise ProductNotFoundException("No matching products found.")
+
+            return Response(content=products.json(), media_type="application/json")
+
+        except ProductNotFoundException as e:
+            logger.add_log_to_buffer("error", str(e))
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e))
+
+        except Exception as e:
+            logger.add_log_to_buffer("critical", f"Error in search_products: {str(e)}")
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
 
     async def cache_response(self, request: Request, response: Response) -> None:
         await self.cache_service.cache_response(request.url.path, response.body)

@@ -4,6 +4,7 @@ Pydantic models for request data validation and JWT token handling in the FastAP
 
 from datetime import datetime, timezone
 
+from fastapi import HTTPException, status
 from jose import jwt, JWTError
 from pydantic import BaseModel, Field, field_validator, ValidationError
 
@@ -23,9 +24,12 @@ class RequestHeaders(BaseModel):
         """
         Validates that the authorization header contains a Bearer token.
         """
-        if not value.startswith("Bearer "):
-            raise ValueError("Authorization header must contain a Bearer token.")
-        return value
+        try:
+            if not value.startswith("Bearer "):
+                raise ValueError("Authorization header must contain a Bearer token.")
+            return value
+        except ValidationError as e:
+            return HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
 
 
 class TokenData(BaseModel):
