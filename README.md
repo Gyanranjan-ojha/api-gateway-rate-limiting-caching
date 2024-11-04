@@ -47,7 +47,6 @@ api-gateway-rate-limiting-caching/
 │   ├── models/                    # Pydantic models for data validation.
 │   │   ├── __init__.py            # Marks the directory as a Python package.
 │   │   ├── product.py              # Defines product-related data models.
-│   │   ├── tokens.py               # Defines JWT token-related models.
 │   │   ├── user.py                 # Defines user-related models.
 │   │   └── validation.py           # Defines validation schemas and logic.
 │   ├── services/                  # Contains business logic services.
