@@ -47,8 +47,8 @@ class ProductService:
         Search for products based on the given search query.
         """
         matched_products = []
-        limit = search_query.get("limit", 10)  # Default limit if not specified
-        max_products = await self.redis_adapter.incr("product_id_counter")  # Get the latest product ID for range
+        limit = search_query.get("limit", 10) 
+        max_products = await self.redis_adapter.incr("product_id_counter") 
 
         for pid in range(max_products):
             product_data = await self.redis_adapter.hgetall(f"product:{pid}")
@@ -56,7 +56,7 @@ class ProductService:
                 matches = all(
                     str(product_data.get(key, "")).lower() == str(value).lower()
                     for key, value in search_query.items()
-                    if key in product_data  # Check only keys that exist in product data
+                    if key in product_data  
                 )
                 if matches:
                     product_data["id"] = pid
@@ -64,7 +64,6 @@ class ProductService:
                         product_data['name'] = product_data.pop('product_name')
                     matched_products.append(Product(**product_data))
             
-            # Break if limit reached
             if len(matched_products) >= limit:
                 break
 
@@ -87,7 +86,7 @@ class ProductService:
         materials = ["Plastic", "Metal", "Glass", "Aluminum", "Carbon Fiber"]
 
         return {
-            "name": f"{fake.company()} {fake.word()}",  # Correct key
+            "name": f"{fake.company()} {fake.word()}",  
             "brand": fake.company(),
             "category": fake.random_element(categories),
             "price": round(fake.random_number(digits=3, fix_len=False) + fake.random_number(digits=2) / 100, 2),

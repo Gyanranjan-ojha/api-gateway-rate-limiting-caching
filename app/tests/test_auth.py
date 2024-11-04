@@ -14,6 +14,5 @@ class TestAuth(BaseTest):
 
         response = self.client.post("/token", data={"username": "testuser", "password": "password"})
         
-        # Ensure the token is returned
         assert response.status_code == 200
         assert "access_token" in response.json()

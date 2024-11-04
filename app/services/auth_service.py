@@ -37,7 +37,6 @@ class AuthService:
 
     def get_user(self, username: str) -> Optional[UserInDB]:
         try:
-            # pdb.set_trace()
             if not username:
                 raise MissingCredentialsException(field_name="username")
             if username in self.user_db:

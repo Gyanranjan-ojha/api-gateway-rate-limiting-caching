@@ -36,7 +36,6 @@ class RequestHandler(AbstractGateway):
                 logger.add_log_to_buffer('warning', f"Rate-limit violation for client: {client_id}")
                 raise RateLimitExceededException()
 
-            # Process the request and generate response
             response = await self.process_request(request)
 
             await self.cache_response(request, response)

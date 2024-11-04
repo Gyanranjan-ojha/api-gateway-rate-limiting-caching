@@ -21,19 +21,16 @@ class RedisRateLimiter(RateLimiter):
     async def check_rate_limit(self, client_id: str) -> bool:
         key = f"rate_limit:{client_id}"
         try:
-            # Check if the rate limit key exists
             count = await self.redis_adapter.get(key)
             
-            if count is None:  # Key does not exist; initialize it
+            if count is None: 
                 count = 0
                 await self.redis_adapter.set(key, str(count), expire=self.window)
             else:
                 count = int(count)
             
-            # Increment the rate limit count
             count = await self.redis_adapter.incr(key)
 
-            # Set expiration if this is the first request after reset
             if count == 1:
                 await self.redis_adapter.expire(key, self.window)
                 

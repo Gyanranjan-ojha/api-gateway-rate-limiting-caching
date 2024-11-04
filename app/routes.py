@@ -24,12 +24,12 @@ from app.core.request_handler import RequestHandler
 from app.core.gateway_factory import GatewayFactory
 from app.db.fake_db import fake_users_db
 from app.models.user import User
-from app.models.validation import RequestHeaders, TokenData
+# from app.models.validation import RequestHeaders, TokenData
 from app.services.auth_service import AuthService
 from app.utils.decorators import apply_rate_limit, jwt_required, timeout
 from app.utils.encoders import DecimalEncoder
 from app.utils.exceptions import (
-    InvalidTokenException,
+    # InvalidTokenException,
     MissingCredentialsException,
     ProductNotFoundException,
     InvalidAPIRequestException,
@@ -80,7 +80,7 @@ async def login_for_access_token(
 @jwt_required(AuthService(fake_users_db.get_all_users())) 
 async def get_products(
     request: Request,
-    request_headers: RequestHeaders = Depends(),
+    # request_headers: RequestHeaders = Depends(),
     request_handler: RequestHandler = Depends(get_gateway),
     current_user: User = Depends(AuthService(fake_users_db.get_all_users()).get_current_user)
 ):
@@ -89,11 +89,11 @@ async def get_products(
     """
     logger.add_log_to_buffer("info", f"User {current_user.username} is attempting to access products.")
     
-    token = request_headers.authorization.split()[1]
-    try:
-        TokenData.from_jwt_token(token)
-    except InvalidTokenException as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e.detail))
+    # token = request_headers.authorization.split()[1]
+    # try:
+    #     TokenData.from_jwt_token(token)
+    # except InvalidTokenException as e:
+    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e.detail))
 
     # await asyncio.sleep(2) # Simulating the delay for timeout response
 
@@ -177,18 +177,12 @@ async def search_products(
 @api_router.get("/cached_products/")
 async def get_cached_products(
     request: Request,
-    request_headers: RequestHeaders = Depends(),
     request_handler: RequestHandler = Depends(get_gateway)
 ):
     """
     Endpoint to retrieve cached products from Redis.
     Cache duration: 5 minutes.
     """
-    token = request_headers.authorization.split()[1]
-    try:
-        TokenData.from_jwt_token(token)
-    except InvalidTokenException as e:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e.detail))
 
     cached_products = await request_handler.cache_service.get_cached_response("cached_products")
 

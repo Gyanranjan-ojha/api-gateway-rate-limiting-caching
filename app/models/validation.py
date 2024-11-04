@@ -52,7 +52,6 @@ class TokenData(BaseModel):
         except JWTError as e:
             raise InvalidTokenException("Invalid JWT token.") from e
         except ValidationError as e:
-            # Custom handling for validation errors, if needed
             raise InvalidTokenException(f"Token data validation error: {str(e)}") from e
 
     @field_validator("exp")

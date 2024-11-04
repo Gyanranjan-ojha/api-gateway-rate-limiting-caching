@@ -2,6 +2,57 @@
 Logging configuration for the FastAPI application.
 """
 
+
+import os
+import logging
+from datetime import datetime
+
+
+class LoggerManager:
+    def __init__(self, logger_name: str):
+        """
+        Initializes the Logger with a logger.
+
+        Args:
+            logger_name (str): The name of the logger.
+        """
+        self.logger = logging.getLogger(logger_name)
+        self.configure_logger()
+
+    def configure_logger(self):
+        """Sets up the logger with a FileHandler."""
+        if not os.path.exists('logs'):
+            os.makedirs('logs')
+
+        log_filename = f"logs/{datetime.now().strftime('%d-%m-%Y')}.log"
+        file_handler = logging.FileHandler(log_filename)
+        log_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+        file_handler.setFormatter(log_formatter)
+
+        self.logger.setLevel(logging.INFO)
+        self.logger.addHandler(file_handler)
+
+    def add_log_to_buffer(self, level: str, message: str):
+        """Writes a log message to the log file immediately."""
+        self.write_logs_immediately(level, message)
+
+    def write_logs_immediately(self, level: str, message: str):
+        """Writes a log message to the log file immediately."""
+        if level == "info":
+            self.logger.info(message)
+        elif level == "warning":
+            self.logger.warning(message)
+        elif level == "error":
+            self.logger.error(message)
+        else:
+            self.logger.critical(message)
+
+        # Flush the handler to ensure the log is written immediately
+        for handler in self.logger.handlers:
+            handler.flush()
+
+logger = LoggerManager("api_logger")
+
 # import os
 # import logging
 # from logging.handlers import TimedRotatingFileHandler
@@ -78,54 +129,3 @@ Logging configuration for the FastAPI application.
 
 # # Instantiate the Logger
 # logger = LoggerManager("api_logger")
-
-import os
-import logging
-from datetime import datetime
-
-
-class LoggerManager:
-    def __init__(self, logger_name: str):
-        """
-        Initializes the Logger with a logger.
-
-        Args:
-            logger_name (str): The name of the logger.
-        """
-        self.logger = logging.getLogger(logger_name)
-        self.configure_logger()
-
-    def configure_logger(self):
-        """Sets up the logger with a FileHandler."""
-        if not os.path.exists('logs'):
-            os.makedirs('logs')
-
-        log_filename = f"logs/{datetime.now().strftime('%d-%m-%Y')}.log"
-        file_handler = logging.FileHandler(log_filename)
-        log_formatter = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
-        file_handler.setFormatter(log_formatter)
-
-        self.logger.setLevel(logging.INFO)
-        self.logger.addHandler(file_handler)
-
-    def add_log_to_buffer(self, level: str, message: str):
-        """Writes a log message to the log file immediately."""
-        self.write_logs_immediately(level, message)
-
-    def write_logs_immediately(self, level: str, message: str):
-        """Writes a log message to the log file immediately."""
-        if level == "info":
-            self.logger.info(message)
-        elif level == "warning":
-            self.logger.warning(message)
-        elif level == "error":
-            self.logger.error(message)
-        else:
-            self.logger.critical(message)
-
-        # Flush the handler to ensure the log is written immediately
-        for handler in self.logger.handlers:
-            handler.flush()
-
-# Instantiate the Logger
-logger = LoggerManager("api_logger")
