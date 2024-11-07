@@ -8,7 +8,7 @@ from functools import wraps
 from fastapi import Request, HTTPException, status
 
 from app.adapters.redis_adapter import RedisAdapter
-from app.config.settings import env_settings
+from app.config.settings import api_settings
 from app.core.request_handler import RequestHandler
 from app.models.user import User
 from app.services.auth_service import AuthService
@@ -26,7 +26,8 @@ def apply_rate_limit(limit: int = 10, window: int = 60):
         async def inner(request: Request, current_user: User, request_handler: RequestHandler, *args, **kwargs):
             client_id = current_user.username
             
-            redis_adapter = RedisAdapter(env_settings.REDIS_URL)
+
+            redis_adapter = RedisAdapter(api_settings.REDIS_URL)
             rate_limiter = RedisRateLimiter(redis_adapter, limit, window)
 
             try:

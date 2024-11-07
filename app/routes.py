@@ -19,17 +19,17 @@ from fastapi import (
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.adapters.redis_adapter import RedisAdapter
-from app.config.settings import env_settings
+from app.config.settings import api_settings
 from app.core.request_handler import RequestHandler
 from app.core.gateway_factory import GatewayFactory
 from app.db.fake_db import fake_users_db
 from app.models.user import User
-# from app.models.validation import RequestHeaders, TokenData
+from app.models.validation import RequestHeaders, TokenData
 from app.services.auth_service import AuthService
 from app.utils.decorators import apply_rate_limit, jwt_required, timeout
 from app.utils.encoders import DecimalEncoder
 from app.utils.exceptions import (
-    # InvalidTokenException,
+    InvalidTokenException,
     MissingCredentialsException,
     ProductNotFoundException,
     InvalidAPIRequestException,
@@ -39,11 +39,16 @@ from app.utils.log_manager import logger
 
 api_router = APIRouter()
 
+RATE_LIMIT = api_settings.RATE_LIMIT
+RATE_LIMIT_WINDOW = api_settings.RATE_LIMIT_WINDOW
+TIMEOUT = api_settings.TIMEOUT
+REDIS_URL = api_settings.REDIS_URL
+
 def get_redis_adapter() -> RedisAdapter:
-    return RedisAdapter(env_settings.REDIS_URL)
+    return RedisAdapter(REDIS_URL)
 
 def get_gateway(redis_adapter: RedisAdapter = Depends(get_redis_adapter)):
-    return GatewayFactory.create_gateway(user_db=fake_users_db.get_all_users(), redis_url=env_settings.REDIS_URL)
+    return GatewayFactory.create_gateway(user_db=fake_users_db.get_all_users(), redis_url=REDIS_URL)
 
 
 @api_router.post("/token", response_model=dict)
@@ -75,12 +80,12 @@ async def login_for_access_token(
 
 
 @api_router.get("/products/")
-@timeout(10)
-@apply_rate_limit(limit=3, window=60)  
+@timeout(TIMEOUT)
+@apply_rate_limit(limit=RATE_LIMIT, window=RATE_LIMIT_WINDOW)  
 @jwt_required(AuthService(fake_users_db.get_all_users())) 
 async def get_products(
     request: Request,
-    # request_headers: RequestHeaders = Depends(),
+    request_headers: RequestHeaders = Depends(),
     request_handler: RequestHandler = Depends(get_gateway),
     current_user: User = Depends(AuthService(fake_users_db.get_all_users()).get_current_user)
 ):
@@ -89,11 +94,11 @@ async def get_products(
     """
     logger.add_log_to_buffer("info", f"User {current_user.username} is attempting to access products.")
     
-    # token = request_headers.authorization.split()[1]
-    # try:
-    #     TokenData.from_jwt_token(token)
-    # except InvalidTokenException as e:
-    #     raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e.detail))
+    token = request_headers.authorization.split()[1]
+    try:
+        TokenData.from_jwt_token(token)
+    except InvalidTokenException as e:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail=str(e.detail))
 
     # await asyncio.sleep(2) # Simulating the delay for timeout response
 
@@ -106,12 +111,12 @@ async def get_products(
     except ProductNotFoundException as err:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=err.detail)
     except Exception as e:
-        print(e)
+        logger.add_log_to_buffer("error", f"Internal server error: {e}")
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"{e}.")
 
 @api_router.get("/products/{product_id}/")
-@timeout(10)
-@apply_rate_limit(limit=3, window=60)
+@timeout(TIMEOUT)
+@apply_rate_limit(limit=RATE_LIMIT, window=RATE_LIMIT_WINDOW)  
 @jwt_required(AuthService(fake_users_db.get_all_users()))
 async def get_product_by_product_id(
     request: Request,
@@ -135,8 +140,8 @@ async def get_product_by_product_id(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 @api_router.get("/products/search")
-@timeout(10)
-@apply_rate_limit(limit=3, window=60)
+@timeout(TIMEOUT)
+@apply_rate_limit(limit=RATE_LIMIT, window=RATE_LIMIT_WINDOW)  
 @jwt_required(AuthService(fake_users_db.get_all_users()))
 async def search_products(
     request: Request,
@@ -144,7 +149,7 @@ async def search_products(
     category: Optional[str] = Query(None, alias="category"),
     min_price: Optional[float] = Query(None, alias="min_price"),
     max_price: Optional[float] = Query(None, alias="max_price"),
-    limit: Optional[int] = Query(10, alias="limit"),  # Default limit of 10
+    limit: Optional[int] = Query(10, alias="limit"),
     request_handler: RequestHandler = Depends(get_gateway),
     current_user: User = Depends(AuthService(fake_users_db.get_all_users()).get_current_user),
 ):

@@ -10,12 +10,6 @@ from datetime import datetime
 
 class LoggerManager:
     def __init__(self, logger_name: str):
-        """
-        Initializes the Logger with a logger.
-
-        Args:
-            logger_name (str): The name of the logger.
-        """
         self.logger = logging.getLogger(logger_name)
         self.configure_logger()
 

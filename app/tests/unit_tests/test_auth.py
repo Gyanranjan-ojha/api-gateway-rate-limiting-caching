@@ -2,7 +2,7 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from app.tests.base_test import BaseTest
+from .base_test import BaseTest
 
 
 class TestAuth(BaseTest):

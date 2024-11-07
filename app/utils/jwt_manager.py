@@ -6,12 +6,12 @@ from datetime import datetime, timedelta, timezone
 
 from jose import jwt
 
-from app.config.settings import env_settings
+from app.config.settings import api_settings
 
 
-SECRET_KEY = env_settings.JWT_SECRET.get_secret_value()
+ACCESS_TOKEN_EXPIRE_MINUTES = api_settings.JWT_EXPIRATION_TIME / 60
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+SECRET_KEY = api_settings.JWT_SECRET.get_secret_value()
 
 def create_access_token(data: dict, expires_delta: timedelta = None) -> str:
     to_encode = data.copy()

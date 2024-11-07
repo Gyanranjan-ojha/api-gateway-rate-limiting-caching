@@ -7,14 +7,14 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
 from app.adapters.redis_adapter import RedisAdapter
-from app.config.settings import env_settings
+from app.config.settings import api_settings
 from app.routes import api_router
 from app.services.product_service import ProductService
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    redis_adapter = RedisAdapter(env_settings.REDIS_URL)
+    redis_adapter = RedisAdapter(api_settings.REDIS_URL)
     product_service = ProductService(redis_adapter)
 
     existing_data = await redis_adapter.hgetall("product:1")

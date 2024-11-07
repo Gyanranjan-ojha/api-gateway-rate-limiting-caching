@@ -117,15 +117,24 @@ class RequestHandler(AbstractGateway):
         await self.cache_service.cache_response(request.url.path, response.body)
 
     async def process_request(self, request: Request) -> Response:
-        cached_response = await self.cache_service.get_cached_response(request.url.path)
-        if cached_response:
-            return Response(content=cached_response, media_type="application/json")
+        try:
+            cached_response = await self.cache_service.get_cached_response(request.url.path)
+            if cached_response:
+                return Response(content=cached_response, media_type="application/json")
 
-        # Route based on the request path and method
-        if request.method == "GET" and request.url.path.startswith("/products"):
-            products = await self.product_service.get_products()
-            if not products:
-                raise ProductNotFoundException()
-            return Response(content=products.json(), media_type="application/json")
+            if request.method == "GET" and request.url.path.startswith("/products"):
+                products = await self.product_service.get_products()
+                if not products:
+                    raise ProductNotFoundException()
+                return Response(content=products.json(), media_type="application/json")
 
-        raise InvalidAPIRequestException()
+            raise InvalidAPIRequestException()
+        
+        except ProductNotFoundException as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=str(e)) 
+        
+        except InvalidAPIRequestException:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid API request")
+        
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"{str(e)}")

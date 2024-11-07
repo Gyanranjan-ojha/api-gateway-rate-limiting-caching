@@ -8,7 +8,7 @@ from fastapi import HTTPException, status
 from jose import jwt, JWTError
 from pydantic import BaseModel, Field, field_validator, ValidationError
 
-from app.config.settings import env_settings
+from app.config.settings import api_settings
 from app.utils.exceptions import InvalidTokenException
 
 
@@ -47,7 +47,7 @@ class TokenData(BaseModel):
         Decodes and validates a JWT token, then initializes a TokenData instance.
         """
         try:
-            payload = jwt.decode(token, env_settings.JWT_SECRET.get_secret_value(), algorithms=["HS256"])
+            payload = jwt.decode(token, api_settings.JWT_SECRET.get_secret_value(), algorithms=["HS256"])
             return cls(**payload)
         except JWTError as e:
             raise InvalidTokenException("Invalid JWT token.") from e

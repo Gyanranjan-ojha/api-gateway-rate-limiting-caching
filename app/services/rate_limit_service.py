@@ -5,6 +5,7 @@ Rate limiting service for controlling request frequency.
 from abc import ABC, abstractmethod
 
 from app.adapters.redis_adapter import RedisAdapter
+from app.config.settings import api_settings
 from app.utils.log_manager import logger
 
 class RateLimiter(ABC):
@@ -13,10 +14,10 @@ class RateLimiter(ABC):
         pass
 
 class RedisRateLimiter(RateLimiter):
-    def __init__(self, redis_adapter: RedisAdapter, limit: int = 3, window: int = 60):
+    def __init__(self, redis_adapter: RedisAdapter):
         self.redis_adapter = redis_adapter
-        self.limit = limit
-        self.window = window
+        self.limit = api_settings.RATE_LIMIT
+        self.window = api_settings.RATE_LIMIT_WINDOW
 
     async def check_rate_limit(self, client_id: str) -> bool:
         key = f"rate_limit:{client_id}"
